@@ -2922,70 +2922,66 @@ def load_module_from_path(i):
             }
     """
 
-    p=i['path']
-    n=i['module_code_name']
+    module_path         = i['path']
+    module_code_name    = i['module_code_name']
+    module_cfg          = i.get('cfg',None)
 
-    xcfg=i.get('cfg',None)
-
-    # Find module
     try:
-       x=imp.find_module(n, [p])
+       (open_file_descriptor, path_to_module, module_description) = imp.find_module(module_code_name, [module_path])
     except ImportError as e: # pragma: no cover
-       return {'return':1, 'error':'can\'t find module code (path='+p+', name='+n+', err='+format(e)+')'}
+       return {'return':1, 'error':"can't find module code (path=%s, name=%s, err=%s)" % (module_path, module_code_name, format(e))}
 
-    ff=x[0]
-    full_path=x[1]
+    # Make sure we only acquire the value once to prevent race condition:
+    module_modification_time = os.path.getmtime(path_to_module)
 
-    # Check if code has been already loaded
-    if full_path in work['cached_module_by_path'] and work['cached_module_by_path_last_modification'][full_path]==os.path.getmtime(full_path):
-       ff.close()
-       # Code already loaded 
-       return work['cached_module_by_path'][full_path]
+    # If code has been already loaded, bail out using the cached results
+    if (    path_to_module in work['cached_module_by_path'] and
+            work['cached_module_by_path_last_modification'][path_to_module]==module_modification_time ):
+        open_file_descriptor.close()
+        return work['cached_module_by_path'][path_to_module]
 
-    # Check if has dependency on specific CK kernel version
-    if xcfg!=None:
-       kd=xcfg.get('min_kernel_dep','')
-       if kd!='':
-          rx=check_version({'version':kd})
-          if rx['return']>0: return rx
-
-          ok=rx['ok']
-          version_str=rx['current_version']
-
-          if ok!='yes':
-             return {'return':1, 'error':'module "'+i.get('data_uoa','')+'" requires minimal CK kernel version '+kd+' while your version is '+version_str} 
+    # Otherwise check if it has dependency on a specific CK kernel version
+    elif module_cfg!=None:
+       min_kernel_dep = module_cfg.get('min_kernel_dep','')
+       if min_kernel_dep!='':
+          rx=check_version({'version':min_kernel_dep})
+          if rx['return']>0:
+              return rx
+          elif rx['ok']!='yes':
+              data_uoa      = i.get('data_uoa','')
+              version_str   = rx['current_version']
+              return {'return':1, 'error':'module "%s" requires minimal CK kernel version %s while your version is %s' % (data_uoa, min_kernel_dep, version_str) }
 
     # Generate uid for the run-time extension of the loaded module 
     # otherwise modules with the same extension (key.py for example) 
     # will be reloaded ...
-
+    #
     r=gen_uid({})
     if r['return']>0: return r
-    ruid='rt-'+r['data_uid']
+    runtime_code_uid = 'rt-'+r['data_uid']
 
     try:
-       c=imp.load_module(ruid, ff, full_path, x[2])
+       module_object = imp.load_module(runtime_code_uid, open_file_descriptor, path_to_module, module_description)
     except ImportError as e: # pragma: no cover
-       return {'return':1, 'error':'can\'t load module code (path='+p+', name='+n+', err='+format(e)+')'}
+       return {'return':1, 'error':"can't load module code (path=%s, name=%s, err=%s)" % (module_path, module_code_name, format(e))}
 
-    x[0].close()
+    open_file_descriptor.close()
 
     # Initialize module with this CK instance 
-    c.ck=sys.modules[__name__]
-    if xcfg!=None: c.cfg=xcfg
+    module_object.ck = sys.modules[__name__]
+    if module_cfg!=None: module_object.cfg = module_cfg
 
-    # Initialize module
-    if i.get('skip_init','')!='yes':
-       # Check if init function exists
-       if getattr(c, 'init')!=None:
-          r=c.init(i)
-          if r['return']>0: return r
+    # If the module has init() function and initialization is not explicitly skipped, call it:
+    if (    'init' in dir(module_object) and
+            i.get('skip_init','')!='yes' ):
+        r = module_object.init(i)
+        if r['return']>0: return r
 
-    r={'return':0, 'code':c, 'path':full_path, 'cuid':ruid}
+    r={'return':0, 'code':module_object, 'path':path_to_module, 'cuid':runtime_code_uid}
 
     # Cache code together with its time of change
-    work['cached_module_by_path'][full_path]=r
-    work['cached_module_by_path_last_modification'][full_path]=os.path.getmtime(full_path)
+    work['cached_module_by_path'][path_to_module]=r
+    work['cached_module_by_path_last_modification'][path_to_module] = module_modification_time
 
     return r
 
@@ -3298,9 +3294,9 @@ def perform_action(i):
        # Check if action in actions
        if action in u.get('actions',{}):
           # Load module
-          mcn=u.get('module_name',cfg['module_code_name'])
+          module_code_name = u.get('module_name',cfg['module_code_name'])
 
-          r=load_module_from_path({'path':p, 'module_code_name':mcn, 'cfg':u, 'data_uoa':rx['data_uoa']})
+          r=load_module_from_path({'path':p, 'module_code_name':module_code_name, 'cfg':u, 'data_uoa':rx['data_uoa']})
           if r['return']>0: return r
 
           c=r['code']
