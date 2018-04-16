@@ -1,3 +1,9 @@
+* V1.9.4.2
+  * refactored load_module_from_path for readability
+  * improved readability of some version-management code
+  * added --tags= support to find() and update() methods and simplified --tags related code in rm()
+  * substituted __version__ into setup.py which removes the need to patch it with every version change
+
 * V1.9.4.1
   * added "debug":"yes" to kernel for GitHub versions
   * fixed minor bug in detection of minimal CK kernel version
