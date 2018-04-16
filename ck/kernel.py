@@ -5232,6 +5232,8 @@ def find(i):
     a=i.get('repo_uoa','')
     m=i.get('module_uoa','')
     duoa=i.get('data_uoa','')
+    tags=i.get('tags','')
+    ss=i.get('search_string','')
 
     if m=='':
        return {'return':1, 'error':'module UOA is not defined'}
@@ -5239,7 +5241,8 @@ def find(i):
        return {'return':1, 'error':'data UOA is not defined'}
 
     if a.find('*')>=0 or a.find('?')>=0 or m.find('*')>=0 or m.find('?')>=0 or duoa.find('*')>=0 or duoa.find('?')>=0: 
-       r=list_data({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa})
+       r=search({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa, 'tags':tags, 'search_string':ss})
+
        if r['return']>0: return r
 
        lst=r['lst']
@@ -5823,13 +5826,16 @@ def update(i):
     a=i.get('repo_uoa','')
     m=i.get('module_uoa','')
     duoa=i.get('data_uoa','')
+    tags=i.get('tags','')
+    ss=i.get('search_string','')
+
 
     if duoa=='': duoa='*'
 
     single_not_found=False # If no wild cards and entry not found, then add
 
     if a.find('*')>=0 or a.find('?')>=0 or m.find('*')>=0 or m.find('?')>=0 or duoa.find('*')>=0 or duoa.find('?')>=0: 
-       r=list_data({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa})
+       r=search({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa, 'tags':tags, 'search_string':ss})
        if r['return']>0: return r
 
        lst=r['lst']
@@ -6006,23 +6012,18 @@ def rm(i):
     a=i.get('repo_uoa','')
     m=i.get('module_uoa','')
     duoa=i.get('data_uoa','')
+    tags=i.get('tags','')
+    ss=i.get('search_string','')
 
     if duoa=='':
        return {'return':1, 'error':'data UOA is not defined'}
 
     lst=[]
 
-    tags=i.get('tags','')
-    ss=i.get('search_string','')
-
     # Check wildcards
     if a.find('*')>=0 or a.find('?')>=0 or m.find('*')>=0 or m.find('?')>=0 or duoa.find('*')>=0 or duoa.find('?')>=0: 
-       if tags=='' and ss=='':
-          r=list_data({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa})
-          if r['return']>0: return r
-       else:
-          r=search({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa, 'tags':tags, 'search_string':ss})
-          if r['return']>0: return r
+       r=search({'repo_uoa':a, 'module_uoa':m, 'data_uoa':duoa, 'tags':tags, 'search_string':ss})
+       if r['return']>0: return r
 
        lst=r['lst']
     else:
