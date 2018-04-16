@@ -7,10 +7,11 @@
 
 from distutils.core import setup
 from distutils.util import convert_path
+from ck.kernel import __version__
 
 setup(
   name='ck',
-  version='1.9.4.1',
+  version=__version__,
   url='https://github.com/ctuning/ck/wiki',
   license='BSD 3-clause',
   author='Grigori Fursin and non-profit cTuning foundation',
