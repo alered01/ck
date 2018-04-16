@@ -1036,15 +1036,10 @@ def get_version(i):
 
     import copy
 
-    s=''
+    version_list    = copy.deepcopy(cfg['version'])
+    version_str     = '.'.join(version_list)
 
-    x=copy.deepcopy(cfg['version'])
-
-    for q in x:
-        if s!='': s+='.'
-        s+=str(q)
-
-    return {'return':0, 'version':x, 'version_str':s}
+    return {'return':0, 'version':version_list, 'version_str':version_str}
 
 ##############################################################################
 # Generate temporary files
@@ -4405,18 +4400,18 @@ def check_version(i):
 
     r=get_version({})
     if r['return']>0: return r
-    version=r['version']
-    version_str=r['version_str']
+    version_list    = r['version']
+    version_str     = r['version_str']
 
     lversion_str=i['version'].replace('dev','.1') # for compatibility with older versions
     lversion=lversion_str.split('.')
 
     # Comparing
-    for q in range(0, len(version)):
+    for q in range(0, len(version_list)):
         if len(lversion)<=q:
             break
 
-        v=version[q]
+        v=version_list[q]
         lv=lversion[q]
 
         # try int first, then try string
@@ -5275,11 +5270,8 @@ def find(i):
                              'data_uoa':duoa, 'data_uid': duid})
 
     if o=='con':
-       pf='' 
        for q in lst:
-           p=q['path']
-           out(p)
-           if pf=='': pf=p
+           out( q['path'] )
 
     i['out']=o
 
@@ -7445,7 +7437,7 @@ def search(i):
        if ss!='': path+='q='+urllib.quote_plus(ss.encode('utf-8'))
        if ls!='': path+='&size='+ls
 
-#       dss={'query':{'filtered':{'filter':{'terms':sd}}}}
+       #dss={'query':{'filtered':{'filter':{'terms':sd}}}}
        dss={}
 
        ri=access_index_server({'request':'GET', 'path':path, 'dict':dss})
