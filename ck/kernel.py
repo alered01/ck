@@ -7260,8 +7260,6 @@ def search(i):
     ss=i.get('search_string','')
     ls=i.get('limit_size','5000')
 
-    rr={'return':0}
-
     sd=i.get('search_dict',{})
 
     tags=i.get('tags','')
@@ -7458,6 +7456,7 @@ def search(i):
               else: x+=duoa
               out(x)
 
+       rr={'return':0}
        rr['lst']=lst
        rr['elapsed_time']=str(time.time() - start_time)
 
