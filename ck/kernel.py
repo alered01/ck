@@ -918,7 +918,7 @@ def select_uoa(i):
     return {'return':0, 'choice':dduoa}
 
 ##############################################################################
-# Convert string to list
+# Convert CSV tags to a list
 
 def convert_str_tags_to_list(i):
     """
@@ -930,18 +930,13 @@ def convert_str_tags_to_list(i):
 
     """
 
-    r=[]
-
     if type(i)==list:
-       r=i
+        stripped_tags   = i
     else:
-       ii=i.split(',')
-       for q in ii:
-           q=q.strip()
-           if q!='':
-              r.append(q)
+        unstripped_tags = i.split(',')
+        stripped_tags   = [t.strip() for t in unstripped_tags if t.strip()]
 
-    return r
+    return stripped_tags
 
 ##############################################################################
 # Check writing possibility
@@ -5624,21 +5619,12 @@ def add(i):
        r=merge_dicts({'dict1':desc, 'dict2':cmad})
        if r['return']>0: return r
 
-    # Check tags 
-    xtags=a.get('tags',[])
+    # Top up tags :
 
-    tags=i.get('tags','')
-    if tags=='': tags=[]
-    elif type(tags)!=list:
-       tags=tags.split(',')
+    split_tags = i.get('tags','').split(',')
+    stripped_nonempty_tags = [t.strip() for t in split_tags if t.strip()]
 
-    for l in range(0,len(tags)):
-        ll=tags[l].strip()
-        if ll not in xtags:
-           xtags.append(ll)
-
-    if len(xtags)>0:
-       a['tags']=xtags
+    a['tags'] = list(set( a.get('tags',[]) + stripped_nonempty_tags ))
 
     # Process info
     cminfo=i.get('info',{})
@@ -7281,11 +7267,10 @@ def search(i):
 
     tags=i.get('tags','')
     if tags!='':
-       xtags=tags.split(',')
-       xtags1=[]
-       for q in xtags:
-           xtags1.append(q.strip())
-       sd['tags']=xtags1
+       split_tags = tags.split(',')
+       stripped_nonempty_tags = [t.strip() for t in split_tags if t.strip()]
+
+       sd['tags'] = stripped_nonempty_tags
 
     # Check if index
     if cfg.get('use_indexing','')!='yes' or i.get('internal','')=='yes':
