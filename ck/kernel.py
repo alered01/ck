@@ -7493,7 +7493,7 @@ def search_filter(i):
 
     # Check special info
     info=i.get('info',{})
-    if len(info)!='':
+    if len(info)>0:
        oaidb=i.get('obj_date_before', None)
        oaida=i.get('obj_date_after', None)
        oaid=i.get('obj_date', None)
