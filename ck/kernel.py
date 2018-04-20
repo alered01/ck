@@ -1878,28 +1878,27 @@ def input_json(i):
 
     out(t)
 
-    s=''
+    json_string     = ''
+    still_loading   = True
 
-    while True:
-       r=inp({'text':''})
+    while still_loading:
+       r = inp({'text':''})
        if r['return']>0: return r
-       ss=r['string'].strip()
-       if ss=='': break
-       s+=ss
 
-    s=s.strip()
+       stripped_line = r['string'].strip()
+       json_string += stripped_line
+       if stripped_line=='':
+            still_loading = False
 
-    if s=='': s='{}' # empty json
-    else:
-       if not s.startswith('{'): s='{'+s
-       if not s.endswith('}'): s+='}'
+    if not json_string.startswith('{'):
+        json_string = '{'+json_string
+    if not json_string.endswith('}'):
+        json_string += '}'
 
-    r=convert_json_str_to_dict({'str':s, 'skip_quote_replacement':'yes'})
+    r = convert_json_str_to_dict({'str':json_string, 'skip_quote_replacement':'yes'})
     if r['return']>0: return r
 
-    d=r['dict']
-
-    return {'return':0, 'string': s, 'dict':d}
+    return {'return':0, 'string': json_string, 'dict':r['dict']}
 
 ##############################################################################
 # Convert CK list to CK dict with unicode in UTF-8 (unification of interfaces)
