@@ -7280,9 +7280,7 @@ def search(i):
              r=restore_flattened_dict({'dict':sfd})
              if r['return']>0: return r
 
-             nd=r['dict']
-
-             sd.update(nd)
+             sd.update( r['dict'] )
 
              del (i['search_flat_dict'])
 
@@ -7290,9 +7288,7 @@ def search(i):
 
        i['search_dict']=sd
 
-       pf=i.get('print_full','')
-       if pf=='': pf='yes'
-       i['print_full']=pf
+       i['print_full'] = i.get('print_full','yes')
 
        rr=list_data(i)
     else:
