@@ -2844,18 +2844,18 @@ def load_meta_from_path(i):
     slu=i.get('skip_updates','')
     sld=i.get('skip_desc','')
 
-    p1=os.path.join(p, cfg['subdir_ck_ext'], cfg['file_meta'])
-    if not os.path.isfile(p1):
-       p1=os.path.join(p, cfg['subdir_ck_ext'], cfg['file_meta_old']) # For compatibility with cM
-       if not os.path.isfile(p1):
-          p1=''
+    meta_file_path=os.path.join(p, cfg['subdir_ck_ext'], cfg['file_meta'])
+    if not os.path.isfile(meta_file_path):
+       meta_file_path=os.path.join(p, cfg['subdir_ck_ext'], cfg['file_meta_old']) # For compatibility with cM
+       if not os.path.isfile(meta_file_path):
+          meta_file_path=''
 
-    if p1!='':
+    if meta_file_path!='':
        rx={'return':0}
 
-       r=load_json_file({'json_file':p1})
+       r=load_json_file({'json_file':meta_file_path})
        if r['return']>0: return r
-       rx['path']=p1
+       rx['path']=meta_file_path
        rx['dict']=r['dict']
 
        # Check info file
@@ -7532,13 +7532,13 @@ def search_filter(i):
 
     sd=i.get('search_dict',{})
 
-    p1=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta'])
-    if not os.path.isfile(p1):
-       p1=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta_old'])
-       if not os.path.isfile(p1):
+    meta_file_path=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta'])
+    if not os.path.isfile(meta_file_path):
+       meta_file_path=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta_old'])
+       if not os.path.isfile(meta_file_path):
           return {'return':0, 'skip':'yes'}
 
-    r=load_json_file({'json_file':p1})
+    r=load_json_file({'json_file':meta_file_path})
     if r['return']>0: return r
     d=r['dict']
 
@@ -7811,13 +7811,13 @@ def search_string_filter(i):
     else:
        ic=i.get('ignore_case','')
 
-       p1=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta'])
-       if not os.path.isfile(p1):
-          p1=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta_old'])
-          if not os.path.isfile(p1):
+       meta_file_path=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta'])
+       if not os.path.isfile(meta_file_path):
+          meta_file_path=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta_old'])
+          if not os.path.isfile(meta_file_path):
              return {'return':0, 'skip':'yes'}
 
-       r=load_json_file({'json_file':p1})
+       r=load_json_file({'json_file':meta_file_path})
        if r['return']>0: return r
        d=r['dict']
 
