@@ -6871,7 +6871,7 @@ def list_data(i):
     oaida=None
     oaid=None
 
-    sn=i.get('search_by_name','')
+    search_by_name=i.get('search_by_name','')
 
     if aidb!='' or aida!='' or aid!='':
 
@@ -6889,7 +6889,7 @@ def list_data(i):
           if rx['return']>0: return rx
           oaid=rx['datetime_obj']
 
-    if oaidb!=None or oaida!=None or oaid!=None or sn!='': 
+    if oaidb!=None or oaida!=None or oaid!=None or search_by_name!='':
        iaf=True
 
     dnatl=i.get('do_not_add_to_lst','')
@@ -6917,7 +6917,7 @@ def list_data(i):
     if sff!='':
        ff=getattr(sys.modules[__name__], sff)
     if ff!=None:
-       sd=i.get('search_dict',{})
+       search_dict=i.get('search_dict',{})
        ic=i.get('ignore_case','')
        ss=i.get('search_string','')
        if ic=='yes': ss=ss.lower()
@@ -7129,7 +7129,7 @@ def list_data(i):
 
                               if ff!=None and ff!='':
                                  ll['out']=o
-                                 ll['search_dict']=sd
+                                 ll['search_dict']=search_dict
                                  ll['search_string']=ss
                                  ll['ignore_case']=ic
                                  ll['ignore_update']=iu
@@ -7137,7 +7137,7 @@ def list_data(i):
                                  if oaidb!=None: ll['obj_date_before']=oaidb
                                  if oaida!=None: ll['obj_date_after']=oaida
                                  if oaid!=None: ll['obj_date']=oaid
-                                 if sn!=None: ll['search_by_name']=sn
+                                 if search_by_name!=None: ll['search_by_name']=search_by_name
 
                                  rx=ff(ll)
                                  if rx['return']>0: 
@@ -7259,15 +7259,14 @@ def search(i):
     o=i.get('out','')
     ss=i.get('search_string','')
     ls=i.get('limit_size','5000')
-
-    sd=i.get('search_dict',{})
+    search_dict=i.get('search_dict',{})
 
     tags=i.get('tags','')
     if tags!='':
        split_tags = tags.split(',')
        stripped_nonempty_tags = [t.strip() for t in split_tags if t.strip()]
 
-       sd['tags'] = stripped_nonempty_tags
+       search_dict['tags'] = stripped_nonempty_tags
 
     # Check if index
     if cfg.get('use_indexing','')!='yes' or i.get('internal','')=='yes':
@@ -7280,13 +7279,13 @@ def search(i):
              r=restore_flattened_dict({'dict':sfd})
              if r['return']>0: return r
 
-             sd.update( r['dict'] )
+             search_dict.update( r['dict'] )
 
              del (i['search_flat_dict'])
 
           i['filter_func']='search_filter'
 
-       i['search_dict']=sd
+       i['search_dict']=search_dict
 
        i['print_full'] = i.get('print_full','yes')
 
@@ -7294,8 +7293,6 @@ def search(i):
     else:
        import time
        start_time = time.time()
-
-       dss={}
 
        ruoa=i.get('repo_uoa','')
        muoa=i.get('module_uoa','')
@@ -7341,8 +7338,8 @@ def search(i):
 
        # Check search keys
        first=True
-       for u in sd:
-           v=sd[u]
+       for u in search_dict:
+           v=search_dict[u]
            if first: 
               first=False
               if ss=='': ss+='('
@@ -7370,9 +7367,9 @@ def search(i):
        aida=aida.strip().replace(' ','T')
        aid=aid.strip().replace(' ','T')
 
-       sn=i.get('search_by_name','')
+       search_by_name=i.get('search_by_name','')
 
-       if sn!='':
+       if search_by_name!='':
           if first: 
              first=False
              if ss=='': ss+='('
@@ -7380,10 +7377,10 @@ def search(i):
           else: 
              ss+=' AND '
 
-          if sn.find('*')<0 and sn.find('?')<0:
-             ss+='data_name:"'+sn+'"'
+          if search_by_name.find('*')<0 and search_by_name.find('?')<0:
+             ss+='data_name:"'+search_by_name+'"'
           else:
-             ss+='data_name:'+sn+''
+             ss+='data_name:'+search_by_name+''
 
        if aidb!='' or aida!='' or aid!='':
           if first: 
@@ -7416,7 +7413,7 @@ def search(i):
        if ss!='': path+='q='+urllib.quote_plus(ss.encode('utf-8'))
        if ls!='': path+='&size='+ls
 
-       #dss={'query':{'filtered':{'filter':{'terms':sd}}}}
+       #dss={'query':{'filtered':{'filter':{'terms':search_dict}}}}
        dss={}
 
        ri=access_index_server({'request':'GET', 'path':path, 'dict':dss})
@@ -7497,7 +7494,7 @@ def search_filter(i):
        oaidb=i.get('obj_date_before', None)
        oaida=i.get('obj_date_after', None)
        oaid=i.get('obj_date', None)
-       sn=i.get('search_by_name','')
+       search_by_name=i.get('search_by_name','')
 
        # Check dates
        if oaidb!=None or oaida!=None or oaid!=None:
@@ -7511,10 +7508,9 @@ def search_filter(i):
              if oaida!=None and oidt<oaida: return {'return':0, 'skip':'yes'}
              if oaid!=None and oidt!=oaid: return {'return':0, 'skip':'yes'}
 
-       # Check if search by name
-       if sn!='':
+       if search_by_name!='':
           ro=find_string_in_dict_or_list({'dict':{'string':info.get('data_name','')}, 
-                                          'search_string':sn,
+                                          'search_string':search_by_name,
                                           'ignore_case':ic})
           if ro['return']>0: return ro
           if ro['found']!='yes': return {'return':0, 'skip':'yes'}
@@ -7524,7 +7520,7 @@ def search_filter(i):
 
     skip='yes'
 
-    sd=i.get('search_dict',{})
+    search_dict=i.get('search_dict',{})
 
     meta_file_path=os.path.join(p,cfg['subdir_ck_ext'],cfg['file_meta'])
     if not os.path.isfile(meta_file_path):
@@ -7537,7 +7533,7 @@ def search_filter(i):
     d=r['dict']
 
     # Check directly
-    rx=compare_dicts({'dict1':d, 'dict2':sd, 'ignore_case':ic})
+    rx=compare_dicts({'dict1':d, 'dict2':search_dict, 'ignore_case':ic})
     if rx['return']>0: return rx
     equal=rx['equal']
     if equal=='yes': skip='no'

@@ -3,6 +3,7 @@
   * improved readability of some version-management code
   * added --tags= support to find() and update() methods and simplified --tags related code in rm()
   * substituted __version__ into setup.py which removes the need to patch it with every version change
+  * renamed some variables and compacted some code, mainly for readability
 
 * V1.9.4.1
   * added "debug":"yes" to kernel for GitHub versions
