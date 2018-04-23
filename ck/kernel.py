@@ -5623,7 +5623,8 @@ def add(i):
     split_tags = i.get('tags','').split(',')
     stripped_nonempty_tags = [t.strip() for t in split_tags if t.strip()]
 
-    a['tags'] = list(set( a.get('tags',[]) + stripped_nonempty_tags ))
+    if stripped_nonempty_tags:
+        a['tags'] = list(set( a.get('tags',[]) + stripped_nonempty_tags ))
 
     # Process info
     cminfo=i.get('info',{})
