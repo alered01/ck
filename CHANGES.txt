@@ -1,5 +1,6 @@
 * V1.9.4.3
   * allow load_module_from_path() to also load package top files (useful e.g. for checking their __version__)
+  * adding Travis tests also for OSX (Python versions 2.7 and 3.6 only)
 
 * V1.9.4.2
   * refactored load_module_from_path for readability

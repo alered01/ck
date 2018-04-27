@@ -1,15 +1,53 @@
-language: python
+# Test some essential features of CK kernel, both on Linux and OSX
+#
+
+os:         linux
+language:   python
+
 python:
-    - "2.7"
-    - "3.3"
-    - "3.4"
-    - "3.5"
-    - "3.6"
+    - 2.7
+    - 3.3
+    - 3.4
+    - 3.5
+    - 3.6
+
+matrix:
+    include:
+        - os: osx
+          language: generic
+          python:   2.7
+          env:      WANTED_PYTHON_VERSION=2.7
+        - os: osx
+          language: generic
+          python:   3.6
+          env:      WANTED_PYTHON_VERSION=3.6
+
+before_install:
+    - |
+        if [ $TRAVIS_OS_NAME == "osx" ]; then
+            brew update                                                         # this swaps python versions and makes 3 the default one
+
+            if [ "$WANTED_PYTHON_VERSION" == "2.7" ]; then
+                brew reinstall python\@2 || brew link --overwrite python\@2     # install and link python2 and pip2 to /usr/local/bin
+            else
+                brew reinstall python                                           # install and link python3 and pip3 to /usr/local/bin
+            fi
+            export PATH=/usr/local/opt/python/libexec/bin:$PATH
+        else
+            sudo apt-get update -qq
+            sudo apt-get install python-pip
+            export WANTED_PYTHON_VERSION=$TRAVIS_PYTHON_VERSION                 # since Python is supported in Linux, get it from Travis
+        fi
+
 
 # skip the install step for now
 install: 
-    - "pip install coveralls"
-    - "pip install pyyaml"
+    - echo "os=${TRAVIS_OS_NAME}, python=${WANTED_PYTHON_VERSION}"
+    - which python
+    - python --version
+    - python -m pip show pip
+    - pip install coveralls
+    - pip install pyyaml
 
 script: coverage run -m tests.test
 
