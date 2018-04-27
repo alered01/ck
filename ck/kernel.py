@@ -10,7 +10,7 @@
 # CK kernel - we made it monolithic with a minimal set 
 # of common functions for performance reasons
 
-__version__ = "1.9.4.2"  # We use 3 digits for the main (released) version and 4th digit for development revision
+__version__ = "1.9.4.3"  # We use 3 digits for the main (released) version and 4th digit for development revision
                          # Do not use characters (to detect outdated version)!
 
 # Extra modules global for the whole kernel
@@ -2954,7 +2954,8 @@ def load_module_from_path(i):
     except ImportError as e: # pragma: no cover
        return {'return':1, 'error':"can't load module code (path=%s, name=%s, err=%s)" % (module_path, module_code_name, format(e))}
 
-    open_file_descriptor.close()
+    if open_file_descriptor:
+        open_file_descriptor.close()
 
     # Initialize module with this CK instance 
     module_object.ck = sys.modules[__name__]
