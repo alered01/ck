@@ -46,8 +46,8 @@ install:
     - which python
     - python --version
     - python -m pip show pip
-    - pip install coveralls
-    - pip install pyyaml
+    - python -m pip install coveralls
+    - python -m pip install pyyaml
 
 script: coverage run -m tests.test
 
