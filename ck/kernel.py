@@ -2926,7 +2926,8 @@ def load_module_from_path(i):
     # If code has been already loaded, bail out using the cached results
     if (    path_to_module in work['cached_module_by_path'] and
             work['cached_module_by_path_last_modification'][path_to_module]==module_modification_time ):
-        open_file_descriptor.close()
+        if open_file_descriptor:
+            open_file_descriptor.close()
         return work['cached_module_by_path'][path_to_module]
 
     # Otherwise check if it has dependency on a specific CK kernel version
