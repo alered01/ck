@@ -2915,6 +2915,18 @@ def load_module_from_path(i):
     module_code_name    = i['module_code_name']
     module_cfg          = i.get('cfg',None)
 
+    # Check if it has dependency on a specific CK kernel version
+    if module_cfg:
+       min_kernel_dep = module_cfg.get('min_kernel_dep','')
+       if min_kernel_dep:
+          rx=check_version({'version':min_kernel_dep})
+          if rx['return']>0:
+              return rx
+          elif rx['ok']!='yes':
+              data_uoa      = i.get('data_uoa','')
+              version_str   = rx['current_version']
+              return {'return':1, 'error':'module "%s" requires minimal CK kernel version %s while your current kernel version is %s' % (data_uoa, min_kernel_dep, version_str) }
+
     try:
        (open_file_descriptor, path_to_module, module_description) = imp.find_module(module_code_name, [module_path])
     except ImportError as e: # pragma: no cover
@@ -2929,18 +2941,6 @@ def load_module_from_path(i):
         if open_file_descriptor:
             open_file_descriptor.close()
         return work['cached_module_by_path'][path_to_module]
-
-    # Otherwise check if it has dependency on a specific CK kernel version
-    elif module_cfg!=None:
-       min_kernel_dep = module_cfg.get('min_kernel_dep','')
-       if min_kernel_dep!='':
-          rx=check_version({'version':min_kernel_dep})
-          if rx['return']>0:
-              return rx
-          elif rx['ok']!='yes':
-              data_uoa      = i.get('data_uoa','')
-              version_str   = rx['current_version']
-              return {'return':1, 'error':'module "%s" requires minimal CK kernel version %s while your version is %s' % (data_uoa, min_kernel_dep, version_str) }
 
     # Generate uid for the run-time extension of the loaded module 
     # otherwise modules with the same extension (key.py for example) 
