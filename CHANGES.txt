@@ -1,3 +1,6 @@
+* V1.9.4.4
+  * added 'default_action_name' key to module's .cm/meta.json to allow intercepting any undefined method
+
 * V1.9.4.3
   * allow load_module_from_path() to also load package top files (useful e.g. for checking their __version__)
   * adding Travis tests also for OSX (Python versions 2.7 and 3.6 only)
